@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6r@*zrudsb(=e8-w)^hhm_dwsyz^%&==!z#tlwme#l1eszv)2d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'expensetracker.urls'
@@ -147,6 +148,8 @@ STATICFILES_DIRS = [BASE_DIR / 'static']  # Ensure this line is present
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Add this line
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
