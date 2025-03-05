@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mt-4 fade-in">
+    <h2>My Expenses</h2>
+
+    <!-- Filter Form -->
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'trackense:add_expense' %}" class="btn btn-primary">Add New Expense</a>
+        <form method="get" class="d-flex">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter"></i> Filter By: 
+                    {% if selected_category %}
+                        {{ selected_category|get_item:expense_categories }}
+                    {% else %}
+                        All Categories
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="categoryDropdown">
+                    <li><a class="dropdown-item" href="?">All Categories</a></li>
+                    {% for value, label in expense_categories %}
+                        <li><a class="dropdown-item" href="?category={{ value }}">{{ label }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </form>
+    </div>
+    
+    {% if not grouped_expenses %}
+        <div class="alert alert-info">
+            No expenses found. Add your first expense using the button above!
+        </div>
+    {% else %}
+        <!-- Period Totals Summary -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Monthly Totals</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for monthly in monthly_totals|slice:":3" %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ monthly.month|date:"F Y" }}</span>
+                                <span class="text-primary">${{ monthly.total|floatformat:2 }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Yearly Totals</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for yearly in yearly_totals %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ yearly.year|date:"Y" }}</span>
+                                <span class="text-primary">${{ yearly.total|floatformat:2 }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Expenses -->
+        {% if grouped_expenses %}
+            <ul class="nav nav-tabs" id="expenseTabs" role="tablist">
+                {% for date, expenses in grouped_expenses.items %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                                id="tab-{{ date|date:'Y-m-d' }}" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#content-{{ date|date:'Y-m-d' }}" 
+                                type="button" 
+                                role="tab">
+                            {{ date|date:"M d, Y" }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="tab-content" id="expenseTabsContent">
+                {% for date, expenses in grouped_expenses.items %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                         id="content-{{ date|date:'Y-m-d' }}" 
+                         role="tabpanel">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for expense in expenses %}
+                                        <tr>
+                                            <td>{{ expense.title }}</td>
+                                            <td>{{ expense.category }}</td>
+                                            <td>${{ expense.amount|floatformat:2 }}</td>
+                                            <td>{{ expense.description }}</td>
+                                            <td>
+                                                <a href="{% url 'trackense:edit_expense' expense.pk %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" 
+                                                        onclick="confirmDelete('{% url 'trackense:delete_expense' expense.pk %}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr class="table-info">
+                                        <td colspan="2"><strong>Daily Total</strong></td>
+                                        <td colspan="3"><strong>${{ totals|get_item:date|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

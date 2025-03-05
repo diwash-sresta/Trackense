@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Income</h2>
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'trackense:add_income' %}" class="btn btn-success">Add New Income</a>
+        <form method="get" class="d-flex">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter"></i> Filter By: 
+                    {% if selected_category %}
+                        {{ selected_category|get_item:income_categories }}
+                    {% else %}
+                        All Categories
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="categoryDropdown">
+                    <li><a class="dropdown-item" href="?">All Categories</a></li>
+                    {% for value, label in income_categories %}
+                        <li><a class="dropdown-item" href="?category={{ value }}">{{ label }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </form>
+    </div>
+
+    {% if not grouped_incomes %}
+        <div class="alert alert-info">
+            No income records found. Add your first income using the button above!
+        </div>
+    {% else %}
+        <!-- Period Totals Summary -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Monthly Income</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for monthly in monthly_totals|slice:":3" %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ monthly.month|date:"F Y" }}</span>
+                                <span class="text-success">${{ monthly.total|floatformat:2 }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Yearly Income</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for yearly in yearly_totals %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ yearly.year|date:"Y" }}</span>
+                                <span class="text-success">${{ yearly.total|floatformat:2 }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Income -->
+        {% if grouped_incomes %}
+            <ul class="nav nav-tabs" id="incomeTabs" role="tablist">
+                {% for date, incomes in grouped_incomes.items %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if forloop.first %}active{% endif %}" 
+                                id="tab-{{ date|date:'Y-m-d' }}" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#content-{{ date|date:'Y-m-d' }}" 
+                                type="button" 
+                                role="tab">
+                            {{ date|date:"M d, Y" }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="tab-content" id="incomeTabsContent">
+                {% for date, incomes in grouped_incomes.items %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                         id="content-{{ date|date:'Y-m-d' }}" 
+                         role="tabpanel">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for income in incomes %}
+                                        <tr>
+                                            <td>{{ income.title }}</td>
+                                            <td>{{ income.category }}</td>
+                                            <td>${{ income.amount|floatformat:2 }}</td>
+                                            <td>{{ income.description }}</td>
+                                            <td>
+                                                <a href="{% url 'trackense:edit_income' income.pk %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" 
+                                                        onclick="confirmDelete('{% url 'trackense:delete_income' income.pk %}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr class="table-success">
+                                        <td colspan="2"><strong>Daily Total</strong></td>
+                                        <td colspan="3"><strong>${{ totals|get_item:date|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

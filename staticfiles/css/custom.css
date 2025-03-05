@@ -1,0 +1,99 @@
+.sidebar {
+    height: 100vh;
+    background-color: #212529;
+    padding-top: 20px;
+    position: fixed;
+    left: 0;
+    width: 250px;
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar .nav-link {
+    color: #fff;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    transition: all 0.3s;
+}
+
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .brand-section span {
+    display: none;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.main-content.expanded {
+    margin-left: 70px;
+}
+
+.toggle-btn {
+    position: absolute;
+    right: -15px;
+    top: 20px;
+    background: #212529;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #343a40;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+}
+
+.brand-section {
+    padding: 20px 25px;
+    border-bottom: 1px solid #343a40;
+    margin-bottom: 20px;
+}
+
+.brand-section a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
